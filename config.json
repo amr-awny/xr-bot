@@ -1,0 +1,48 @@
+{
+  "channels": {
+    "registration": "1445204970453471232",
+    "spare": "1445204976178561114",
+    "list": "1445204990829396038",
+    "teamRequest": "1446394755901689959",
+    "logs": "1446394748159131760",
+    "feedback": "1445205003877748786",
+    "support": "1445204984047337683",
+    "rules": "1445204944763486279",
+    "blacklist": "1432357495262937310"
+  },
+  "messages": {
+    "openRegistration": "التسجيل مفتوح الآن!",
+    "closeRegistration": "التسجيل مغلق.",
+    "openSpare": "التسجيل الاحتياطي مفتوح الآن!",
+    "closeSpare": "التسجيل الاحتياطي مغلق.",
+    "listMessage": "الفرق المسجلة:"
+  },
+  "prefix": "~",
+  "owners": [
+    "1429871149126520853"
+  ],
+  "tickets": {
+    "categories": {
+      "support": "1445204033668255784",
+      "financial": "1445204033668255784",
+      "report": "1445204033668255784",
+      "suggestion": "1445204033668255784"
+    },
+    "categoryId": "1445204033668255784",
+    "staffRoleId": "1445203203577876621",
+    "staffRole": "1445203203577876621",
+    "logChannel": "1445205108152467506"
+  },
+  "status": "online",
+  "suggestionsChannelId": "1447872826509103137",
+  "categoryId": "1445204033668255784",
+  "staffRoleId": "1445203203577876621",
+  "autoRoleId": "1445203489096470528",
+  "welcomeChannelId": "1445204544005996644",
+  "logsChannelId": "1445205108152467506",
+  "welcomeImage": {
+    "enabled": true,
+    "fontPath": "./assets/fonts/YourFont.ttf",
+    "background": ".welcome-bg."
+  }
+}
