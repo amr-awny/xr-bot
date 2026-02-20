@@ -7,6 +7,9 @@ function saveConfig(newConfig) {
 }
 const { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerStatus } = require('@discordjs/voice');
 const path = require('path');
+
+const autoReplies = require('./autoReplies.json');
+
 const {
 Client,
 GatewayIntentBits,
@@ -220,10 +223,22 @@ return true;
 
 // التعامل مع الرسائل
 client.on('messageCreate', async message => {
-if (!message.content.startsWith(client.prefix) || message.author.bot) return;
+if (message.author.bot) return;
+
+// ✅ Auto Replies بدون prefix
+const content = message.content.trim().toLowerCase();
+const key = Object.keys(autoReplies)
+  .find(k => k.toLowerCase() === content);
+
+if (key) {
+  await message.channel.send(autoReplies[key].response);
+  return;
+}
+
+// ✅ أوامر بالـ prefix
+if (!message.content.startsWith(client.prefix)) return;
 
 const args = message.content.slice(client.prefix.length).trim().split(/ +/);
-
 let commandName = args.shift().toLowerCase();
 
 // ✅ دعم أوامر من كلمتين زي result calculator
@@ -1401,5 +1416,4 @@ if (fs.existsSync(eventsPath)) {
 }
 
 // 🔑 تسجيل الدخول
-console.log("TOKEN VALUE:", process.env.BOT_TOKEN);
 client.login(process.env.BOT_TOKEN);
