@@ -2,6 +2,21 @@ const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('
 const fs = require('fs');
 const path = require('path');
 
+
+async function safeReply(interaction, message, content) {
+  if (interaction) {
+    if (interaction.deferred || interaction.replied) {
+      await interaction.editReply({ content });
+    } else {
+      await interaction.reply({ content, flags: 64 });
+    }
+  } else if (message) {
+    await message.reply({ content });
+  }
+}
+
+
+
 module.exports = {
   name: 'scrim-create',
   description: 'إنشاء سكرم جديد',
@@ -13,7 +28,7 @@ module.exports = {
       const isSlashCommand = interactionOrMessage.isChatInputCommand?.();
       const isMessage = interactionOrMessage.author && interactionOrMessage.channel;
 
-      let interaction = interactionOrMessage;
+      let interaction = isMessage ? null : interactionOrMessage;
       let message = isMessage ? interactionOrMessage : null;
 
       // الحصول على البيانات
@@ -28,8 +43,8 @@ module.exports = {
         mode = (interaction.fields.getTextInputValue('mode')?.toLowerCase() === 'on' ? 'on' : 'auto');
 
         // رد على المودال
-        if (!interaction.replied) {
-          await interaction.reply({ content: '⏳ يتم إنشاء السكرم...', flags: 64 });
+       if (!interaction.deferred && !interaction.replied) {
+          await interaction.deferReply({ flags: 64 });
         }
       } 
       else if (isSlashCommand) {
@@ -67,20 +82,27 @@ module.exports = {
       }
 
       // تحقق من صحة البيانات
-      if (!scrimTime || !spareTime || !startTime) {
-        const errorMsg = '❌ البيانات غير كاملة! تأكد من إدخال جميع الأوقات.';
+      // قبل
+if (!scrimTime || !spareTime || !startTime) {
+  const errorMsg = '❌ البيانات غير كاملة! تأكد من إدخال جميع الأوقات.';
+  if (interaction) {
+    if (interaction.deferred || interaction.replied) {
+      await interaction.editReply({ content: errorMsg });
+    } else {
+      await interaction.reply({ content: errorMsg, flags: 64 });
+    }
+  } else if (message) {
+    await message.reply({ content: errorMsg });
+  }
+  return;
+}
 
-        if (isModal && interaction.replied) {
-          await interaction.editReply({ content: errorMsg });
-        } else if (isModal) {
-          await interaction.reply({ content: errorMsg, flags: 64 });
-        } else if (isSlashCommand && interaction.deferred) {
-          await interaction.editReply({ content: errorMsg });
-        } else if (message) {
-          await message.reply({ content: errorMsg, flags: 64 });
-        }
-        return;
-      }
+// بعد
+if (!scrimTime || !spareTime || !startTime) {
+  return await safeReply(interaction, message, '❌ البيانات غير كاملة! تأكد من إدخال جميع الأوقات.');
+}
+
+
 
       const mapRotationOptions = {
         1: ['Room [1]: Erangel', 'Room [2]: Miramar', 'Room [3]: Sanhok'],
@@ -97,19 +119,16 @@ module.exports = {
         : {};
 
       if (diskScrims[scrimId]) {
-        const replyContent = '❌ فيه سكريم بالفعل بنفس الوقت!';
+  const replyContent = '❌ فيه سكريم بالفعل بنفس الوقت!';
 
-        if (isModal && interaction.replied) {
-          await interaction.editReply({ content: replyContent });
-        } else if (isModal) {
-          await interaction.reply({ content: replyContent, flags: 64 });
-        } else if (isSlashCommand && interaction.deferred) {
-          await interaction.editReply({ content: replyContent });
-        } else if (message) {
-          await message.reply({ content: replyContent, flags: 64 });
-        }
-        return;
-      }
+  if (interaction.deferred || interaction.replied) {
+    await interaction.editReply({ content: replyContent });
+  } else {
+    await interaction.reply({ content: replyContent, flags: 64 });
+  }
+  return;
+}
+
 
       // إنشاء السكرم
       const scrimEntry = {
@@ -143,7 +162,7 @@ module.exports = {
       const guild = interaction?.guild || message?.guild;
       const user = interaction?.user || message?.author;
 
-      const serverName = "𝐄𝐋¹ ᴢ ᴇ ᴛ丨𝐄𝗦𝗣𝗢𝗥𝗧𝗦";
+      const serverName = "Ӿᴀᴛᴏʀᴀ丨𝐄-𝐒𝐩𝐨𝐫𝐭𝐬";
       const serverIcon = guild?.iconURL({ dynamic: true, size: 64 }) || null;
 
       const logsEmbed = new EmbedBuilder()
@@ -173,27 +192,44 @@ module.exports = {
       }
 
       // إنشاء رسالة التسجيل
-      const bigDescription = [
-        `- تم فتح باب التسجيل لـ سكرم الساعة ${scrimTime} بتوقيت مصر و السعوديه`,
-        ``,
-        `-  التوحيد 2`,
-        ``,
-        `-  غرف متقدمة`,
-        ``,
-        `-  استمتع مع   𝐄𝐋¹ ᴢ ᴇ ᴛ丨𝐄𝗦𝗣𝗢𝗥𝗧𝐒`,
-        ``,
-        `--------------------------------------`,
-        ``,
-        `・𝗦𝗰𝗿𝗶𝗺 𝗥𝗲𝗴𝗶𝘀𝘁𝗿𝗮𝘁𝗶𝗼𝗻 𝗛𝗮𝘀 𝗢𝗽𝗲𝗻𝗲𝗱 𝗙𝗼𝗿 𝗦𝗰𝗿𝗶𝗺 𝗔𝘁 ${scrimTime}`,
-        ``,
-        `・𝗨𝗻𝗶𝗳𝗶𝗰𝗮𝘁𝗶𝗼𝗻: 𝟮`,
-        ``,
-        `・𝗔𝗱𝘃𝗮𝗻𝗰𝗲𝗱 𝗥𝗼𝗼𝗺s`,
-        ``,
-        `・𝗘𝗻𝗷𝗼𝘆   𝐄𝐋¹ ᴢ ᴇ ᴛ丨𝐄𝗦𝗣𝗢𝗥𝗧𝐒`,
-        ``,
-        `𝗠𝗲𝗻𝘁𝗶𝗼𝗻: ||**@everyone**||`
-      ].join('\n');
+
+const scrimTimeKsa = "01:00";  // 🇸🇦 السعودية
+        
+        const bigDescription = [
+
+  `# OPENING REGISTRATION`,
+
+  ``,
+
+  `**`,
+
+  ``,
+
+  `- Scrim Registration Has Opened Now.`,
+
+  ``,
+
+  `- KSA: **${scrimTimeKsa}** 🇸🇦 & EGY: **${spareTime}** 🇪🇬`,
+
+  ``,
+
+  `- Organizer: <@${scrimEntry.createdBy.id}>`,
+
+  ``,
+
+  `- Have Fun, 🏆 E-Sports Rooms`,
+
+  `  Era Mir Ron`,
+
+  ``,
+
+  `- Mention: ||@everyone|| & ||@here||`,
+
+  ``,
+
+  `**`
+
+].join('\n');
 
       const regEmbed = new EmbedBuilder()
         .setDescription(bigDescription)
@@ -239,30 +275,35 @@ module.exports = {
       if (typeof saveData === 'function') saveData();
 
       // إرسال رسالة النجاح
-      const successMessage = `🟢 تم إنشاء السكرم بنجاح!\n📅 Time: **${scrimTime}**\n📍 Channel: <#${regChannel.id}>`;
+      // إرسال رسالة النجاح
 
-      if (isModal && interaction.replied) {
-        await interaction.editReply({ content: successMessage });
-      } else if (isModal) {
-        await interaction.reply({ content: successMessage, flags: 64 });
-      } else if (isSlashCommand && interaction.deferred) {
-        await interaction.editReply({ content: successMessage });
-      } else if (message) {
-        await message.reply({ content: successMessage, flags: 64 });
-      }
+const successMessage = `🟢 تم إنشاء السكرم بنجاح!\n📅 Time: **${scrimTime}**\n📍 Channel: <#${regChannel.id}>`;
 
-    } catch (err) {
-      console.error("SCRIM ERROR >>>", err);
+if (interaction?.replied || interaction?.deferred) {
+  await interaction.editReply({ content: successMessage });
+} else if (interaction) {
+  await interaction.reply({ content: successMessage, flags: 64 });
+} else if (message) {
+  await message.reply({ content: successMessage });
+}
 
-      const errorMessage = '❌ حصل خطأ أثناء إنشاء السكرم.';
 
-      if (interaction?.replied) {
-        await interaction.editReply({ content: errorMessage });
-      } else if (interaction && !interaction.replied) {
-        await interaction.reply({ content: errorMessage, flags: 64 });
-      } else if (message) {
-        await message.reply({ content: errorMessage, flags: 64 });
-      }
+   } catch (err) {
+  console.error("SCRIM ERROR >>>", err);
+
+  const errorMessage = '❌ حصل خطأ أثناء إنشاء السكرم.';
+
+  if (interaction) {
+    if (interaction.deferred || interaction.replied) {
+      await interaction.editReply({ content: errorMessage });
+    } else {
+      await interaction.reply({ content: errorMessage, flags: 64 });
     }
+  } else if (message) {
+    await message.reply({ content: errorMessage });
+  }
+}
+
+
   }
 };
